@@ -1,4 +1,5 @@
 #include "../include/account.h"
+#include "../include/bank.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,38 +57,6 @@ static int read_long_value(const char *prompt, long *value) {
     return 1;
 }
 
-static void initialize_accounts(Account accounts[], int size) {
-    int index;
-
-    for (index = 0; index < size; ++index) {
-        account_clear(&accounts[index]);
-    }
-}
-
-static int find_empty_account_slot(Account accounts[], int size) {
-    int index;
-
-    for (index = 0; index < size; ++index) {
-        if (!accounts[index].isActive) {
-            return index;
-        }
-    }
-
-    return -1;
-}
-
-static int is_duplicate_account_number(const Account accounts[], int size, const char *accountNumber) {
-    int index;
-
-    for (index = 0; index < size; ++index) {
-        if (account_matches_number(&accounts[index], accountNumber)) {
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
 static void print_menu(void) {
     printf("\n=== Banking System ===\n");
     printf("1. Create Account\n");
@@ -96,24 +65,17 @@ static void print_menu(void) {
     printf("Select: ");
 }
 
-static void handle_create_account(Account accounts[], int size) {
+static void handle_create_account(Bank *bank) {
     char accountNumber[ACCOUNT_NUMBER_LENGTH];
     char ownerName[OWNER_NAME_LENGTH];
     long initialBalance;
-    int slotIndex;
-
-    slotIndex = find_empty_account_slot(accounts, size);
-    if (slotIndex < 0) {
-        printf("Cannot create more accounts. Storage is full.\n");
-        return;
-    }
 
     if (!read_line("Account Number: ", accountNumber, sizeof(accountNumber))) {
         printf("Failed to read account number.\n");
         return;
     }
 
-    if (is_duplicate_account_number(accounts, size, accountNumber)) {
+    if (bank_has_account_number(bank, accountNumber)) {
         printf("Account number already exists.\n");
         return;
     }
@@ -128,7 +90,7 @@ static void handle_create_account(Account accounts[], int size) {
         return;
     }
 
-    if (!account_create(&accounts[slotIndex], accountNumber, ownerName, initialBalance)) {
+    if (!bank_create_account(bank, accountNumber, ownerName, initialBalance)) {
         printf("Failed to create account. Check the input values.\n");
         return;
     }
@@ -136,32 +98,16 @@ static void handle_create_account(Account accounts[], int size) {
     printf("Account created successfully.\n");
 }
 
-static void handle_list_accounts(const Account accounts[], int size) {
-    int index;
-    int found = 0;
-
+static void handle_list_accounts(const Bank *bank) {
     printf("\n=== Account List ===\n");
-
-    for (index = 0; index < size; ++index) {
-        if (!accounts[index].isActive) {
-            continue;
-        }
-
-        account_print(&accounts[index]);
-        printf("\n");
-        found = 1;
-    }
-
-    if (!found) {
-        printf("No accounts found.\n");
-    }
+    bank_print_all_accounts(bank);
 }
 
 int main(void) {
-    Account accounts[MAX_ACCOUNTS];
+    Bank bank;
     long menu;
 
-    initialize_accounts(accounts, MAX_ACCOUNTS);
+    bank_initialize(&bank);
 
     while (1) {
         print_menu();
@@ -177,9 +123,9 @@ int main(void) {
         }
 
         if (menu == 1) {
-            handle_create_account(accounts, MAX_ACCOUNTS);
+            handle_create_account(&bank);
         } else if (menu == 2) {
-            handle_list_accounts(accounts, MAX_ACCOUNTS);
+            handle_list_accounts(&bank);
         } else {
             printf("Invalid menu option.\n");
         }
