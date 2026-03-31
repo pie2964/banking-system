@@ -1,0 +1,9 @@
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
+
+#define MAX_ACCOUNTS 100
+#define ACCOUNT_NUMBER_LENGTH 32
+#define OWNER_NAME_LENGTH 64
+#define MIN_INITIAL_BALANCE 0L
+
+#endif

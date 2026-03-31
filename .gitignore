@@ -4,3 +4,4 @@ build/
 *.o
 .vs/
 AGENTS.md
+docs/
