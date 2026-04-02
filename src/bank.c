@@ -46,6 +46,22 @@ int bank_has_account_number(const Bank *bank, const char *accountNumber) {
     return 0;
 }
 
+const Account *bank_find_account_by_number(const Bank *bank, const char *accountNumber) {
+    int index;
+
+    if (bank == NULL || accountNumber == NULL) {
+        return NULL;
+    }
+
+    for (index = 0; index < MAX_ACCOUNTS; ++index) {
+        if (account_matches_number(&bank->accounts[index], accountNumber)) {
+            return &bank->accounts[index];
+        }
+    }
+
+    return NULL;
+}
+
 int bank_create_account(Bank *bank, const char *accountNumber, const char *ownerName, long initialBalance) {
     int slotIndex;
 
@@ -53,7 +69,7 @@ int bank_create_account(Bank *bank, const char *accountNumber, const char *owner
         return 0;
     }
 
-    if (bank_has_account_number(bank, accountNumber)) {
+    if (bank_find_account_by_number(bank, accountNumber) != NULL) {
         return 0;
     }
 

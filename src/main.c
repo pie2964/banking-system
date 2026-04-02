@@ -60,7 +60,8 @@ static int read_long_value(const char *prompt, long *value) {
 static void print_menu(void) {
     printf("\n=== Banking System ===\n");
     printf("1. Create Account\n");
-    printf("2. List Accounts\n");
+    printf("2. View Account\n");
+    printf("3. List Accounts\n");
     printf("0. Exit\n");
     printf("Select: ");
 }
@@ -103,6 +104,25 @@ static void handle_list_accounts(const Bank *bank) {
     bank_print_all_accounts(bank);
 }
 
+static void handle_view_account(const Bank *bank) {
+    char accountNumber[ACCOUNT_NUMBER_LENGTH];
+    const Account *account;
+
+    if (!read_line("Account Number: ", accountNumber, sizeof(accountNumber))) {
+        printf("Failed to read account number.\n");
+        return;
+    }
+
+    account = bank_find_account_by_number(bank, accountNumber);
+    if (account == NULL) {
+        printf("Account not found.\n");
+        return;
+    }
+
+    printf("\n=== Account Detail ===\n");
+    account_print(account);
+}
+
 int main(void) {
     Bank bank;
     long menu;
@@ -125,6 +145,8 @@ int main(void) {
         if (menu == 1) {
             handle_create_account(&bank);
         } else if (menu == 2) {
+            handle_view_account(&bank);
+        } else if (menu == 3) {
             handle_list_accounts(&bank);
         } else {
             printf("Invalid menu option.\n");
